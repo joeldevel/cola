@@ -3,8 +3,8 @@
 #include "cola.h"
 // el nodo ?
 typedef struct nodo {
-    int dato;
-    struct nodo * siguiente;
+    void *dato;
+    struct nodo * siguiente_nodo;
 } nodo_t;
 // el struct
 typedef struct cola {
@@ -14,10 +14,57 @@ typedef struct cola {
 // primitivas para practicar
 cola_t* crear_cola() {
     cola_t *cola = malloc(sizeof(cola_t));
+    if (!cola) return NULL;
     cola->primer_elemento = NULL;
     cola->ultimo_elemento = NULL;
     return cola;
 }
+bool vacia(cola_t *cola) {
+  return cola->primer_elemento == NULL && cola->ultimo_elemento == NULL;
+}
+
+void esta_vacia(cola_t *cola) {
+    if (vacia(cola)) printf("esta vacia\n");
+    else printf("No esta vacia\n");
+}
+
+bool cola_encolar(cola_t *cola, void *valor) {
+  nodo_t *nodo = malloc(sizeof(nodo_t));
+  if (!nodo) return false;
+  nodo->dato = valor;
+  nodo->siguiente_nodo = NULL;
+  if (cola->primer_elemento == NULL && cola->ultimo_elemento == NULL) {
+    cola->primer_elemento = nodo;
+    cola->ultimo_elemento = nodo;
+    return true;
+  }
+  cola->primer_elemento->siguiente_nodo = nodo;
+  cola->primer_elemento = cola->primer_elemento->siguiente_nodo;
+  return true;
+}
+
+void *cola_ver_primero(const cola_t *cola) {
+  return cola->ultimo_elemento->dato;
+}
+
+void *cola_desencolar(cola_t *cola) {
+  if (vacia(cola)) return NULL;
+
+  nodo_t * tmp = cola->ultimo_elemento;
+  cola->ultimo_elemento = cola->ultimo_elemento->siguiente_nodo;
+  free(tmp);
+  return cola->ultimo_elemento->dato;
+}
+void cola_destruir(cola_t *cola, void (*destruir_dato)(void *)) {
+  if (destruir_dato == NULL) {
+    while (cola->ultimo_elemento) {
+      cola_desencolar(cola);
+    }
+  }
+  free(cola);
+
+}
+/*
 void encolar(cola_t* cola, int dato) {
     nodo_t *nodo = malloc(sizeof(nodo_t));
     nodo->dato = dato;
@@ -53,6 +100,7 @@ void esta_vacia(cola_t *cola) {
 void ver_primero(const cola_t * cola) {
     printf("el primero es: %d\n", cola->ultimo_elemento->dato);
 }
+*/
 // las primitivas para el tp
 /*
 cola_t *cola_crear(void) {
@@ -69,25 +117,27 @@ void *cola_desencolar(cola_t *cola) {
 }
 */
 int main(int argc, char *argv[]) {
-    //nodo_t nodo; nodo.dato = 5;
-    //nodo_t nodo2; nodo2.dato = 87;
-    //nodo.siguiente = &nodo2;
-    // printf("el dato es %d\n", nodo.dato);
-    // printf("el dato del siguiente es %d\n", nodo.siguiente->dato);
-    // La cola
     cola_t *cola = crear_cola();
+    // esta_vacia(cola);
+    // encolar( cola, 87);
     esta_vacia(cola);
-    encolar( cola, 87);
-    esta_vacia(cola);
-    encolar( cola, 21);
-    encolar( cola, 45);
-    ver_primero(cola);
+    int datito = 34;
+    int datito2 = 495;
+    cola_encolar( cola, &datito);
+    cola_encolar( cola, &datito2);
+    printf("ver_primero: %d\n",*(int*)cola_ver_primero(cola) );
+    printf("desencolar: %d\n",*(int*)cola_desencolar(cola) );
+    printf("ver_primero despues de desencolar: %d\n",*(int*)cola_ver_primero(cola) );
+
+    // encolar( cola, 45);
+    // ver_primero(cola);
     //printf("Al principio: %d\n", cola->primer_elemento->dato);
     //printf("Al ultimo: %d\n", cola->ultimo_elemento->dato);
-    printf("desencolando :%d\n", desencolar(cola));
+    // printf("desencolando :%d\n", desencolar(cola));
    // printf("desencolando :%d\n", desencolar(cola));
    // printf("desencolando :%d\n", desencolar(cola));
-    
-    destruir(cola);
+
+    // destruir(cola);
+    cola_destruir(cola, NULL);
     return 0;
 }
