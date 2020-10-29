@@ -20,7 +20,7 @@ cola_t* crear_cola() {
     return cola;
 }
 bool vacia(cola_t *cola) {
-  return cola->primer_elemento == NULL && cola->ultimo_elemento == NULL;
+    return cola->primer_elemento == NULL && cola->ultimo_elemento == NULL;
 }
 
 void esta_vacia(cola_t *cola) {
@@ -29,53 +29,103 @@ void esta_vacia(cola_t *cola) {
 }
 
 bool cola_encolar(cola_t *cola, void *valor) {
-  nodo_t *nodo = malloc(sizeof(nodo_t));
-  if (!nodo) return false;
-  nodo->dato = valor;
-  nodo->siguiente_nodo = NULL;
-  if (cola->primer_elemento == NULL && cola->ultimo_elemento == NULL) {
-    cola->primer_elemento = nodo;
-    cola->ultimo_elemento = nodo;
+    nodo_t *nodo = malloc(sizeof(nodo_t));
+    if (!nodo) return false;
+    nodo->dato = valor;
+    nodo->siguiente_nodo = NULL;
+    if (cola->primer_elemento == NULL && cola->ultimo_elemento == NULL) {
+        cola->primer_elemento = nodo;
+        cola->ultimo_elemento = nodo;
+        return true;
+    }
+    cola->primer_elemento->siguiente_nodo = nodo;
+    cola->primer_elemento = cola->primer_elemento->siguiente_nodo;
     return true;
-  }
-  cola->primer_elemento->siguiente_nodo = nodo;
-  cola->primer_elemento = cola->primer_elemento->siguiente_nodo;
-  return true;
 }
 
 void *cola_ver_primero(const cola_t *cola) {
-  return cola->ultimo_elemento->dato;
+    return cola->ultimo_elemento->dato;
 }
 
 void *cola_desencolar(cola_t *cola) {
-  printf("(Entrando a cola_desencolar)\n" );
+    printf("(Entrando a cola_desencolar)\n" );
 
-  if (vacia(cola)) return NULL;
+    if (vacia(cola)) return NULL;
 
-  nodo_t * tmp = cola->ultimo_elemento;
-  cola->ultimo_elemento = cola->ultimo_elemento->siguiente_nodo;
-  free(tmp);
-  printf("(cola_desencolar) despues del free\n" );
-  if (cola->ultimo_elemento == NULL) return NULL;
-  return cola->ultimo_elemento->dato;
+    nodo_t * tmp = cola->ultimo_elemento;
+    cola->ultimo_elemento = cola->ultimo_elemento->siguiente_nodo;
+    free(tmp);
+    printf("(cola_desencolar) despues del free\n" );
+    if (cola->ultimo_elemento == NULL) {
+        printf("cola->ultimo_elemento=NULL\n");
+        return NULL;
+    }
+    return cola->ultimo_elemento->dato;
 }
 void cola_destruir(cola_t *cola, void (*destruir_dato)(void *)) {
-  printf("(Entrando a cola_destruir)\n" );
-  if (destruir_dato == NULL) {
-    while (cola->ultimo_elemento) {
-      cola_desencolar(cola);
-      printf("(dentro del while)\n" );
+    printf("(1 Entrando a cola_destruir)\n" );
+    if (destruir_dato == NULL) {
+        while (cola->ultimo_elemento) {
+            cola_desencolar(cola);
+            printf("(dentro del while)\n" );
+        }
     }
-  }
-  else {
-    while (cola->ultimo_elemento) {
-      destruir_dato(cola);
-      printf("(dentro del while del else)\n" );
+    else {
+        while (cola->ultimo_elemento) {
+            printf("2 destruyendo: %d\n",*(int*)cola_ver_primero(cola) );
+            destruir_dato(cola->ultimo_elemento->dato);
+            printf("( 3 dentro del while del else)\n" );
+            cola_desencolar(cola);
+        }
     }
-  }
-  free(cola);
+    // free(cola->ultimo_elemento);
+    // free(cola->primer_elemento);
+    printf("antes de free(cola)\n");
+    // printf("cola_ver_primero: %d\n",*(int*)cola_ver_primero(cola) );
+
+    free(cola);
 
 }
+
+int main(int argc, char *argv[]) {
+    cola_t *cola = crear_cola();
+    // esta_vacia(cola);
+    // encolar( cola, 87);
+    esta_vacia(cola);
+    // int datito = 34;
+    // int datito2 = 495;
+    // cola_encolar( cola, &datito);
+    // cola_encolar( cola, &datito2);
+    // test con datos en memoria dinamica
+    int *datito = malloc(sizeof(int));
+    int *datito2 = malloc(sizeof(int));
+    int *datito3 = malloc(sizeof(int));
+    *datito = 34;
+    *datito2 = 495;
+    *datito3 = 121;
+    cola_encolar( cola, datito);
+    cola_encolar( cola, datito2);
+    cola_encolar( cola, datito3);
+    printf("ver_primero: %d\n",*(int*)cola_ver_primero(cola) );
+    printf("desencolar: %d\n",*(int*)cola_desencolar(cola) );
+    // printf("ver_primero despues de desencolar: %d\n",*(int*)cola_ver_primero(cola) );
+
+    // encolar( cola, 45);
+    // ver_primero(cola);
+    //printf("Al principio: %d\n", cola->primer_elemento->dato);
+    //printf("Al ultimo: %d\n", cola->ultimo_elemento->dato);
+    // printf("desencolando :%d\n", desencolar(cola));
+    // printf("desencolando :%d\n", desencolar(cola));
+    // printf("desencolando :%d\n", desencolar(cola));
+
+    // destruir(cola);
+    cola_destruir(cola, free);
+    free(datito);
+    return 0;
+}
+
+
+
 /*
 void encolar(cola_t* cola, int dato) {
     nodo_t *nodo = malloc(sizeof(nodo_t));
@@ -128,29 +178,3 @@ void *cola_ver_primero(const cola_t *cola) {
 void *cola_desencolar(cola_t *cola) {
 }
 */
-int main(int argc, char *argv[]) {
-    cola_t *cola = crear_cola();
-    // esta_vacia(cola);
-    // encolar( cola, 87);
-    esta_vacia(cola);
-    // int datito = 34;
-    // int datito2 = 495;
-    // cola_encolar( cola, &datito);
-    // cola_encolar( cola, &datito2);
-    test con datos en memoria dinamica
-    printf("ver_primero: %d\n",*(int*)cola_ver_primero(cola) );
-    printf("desencolar: %d\n",*(int*)cola_desencolar(cola) );
-    printf("ver_primero despues de desencolar: %d\n",*(int*)cola_ver_primero(cola) );
-
-    // encolar( cola, 45);
-    // ver_primero(cola);
-    //printf("Al principio: %d\n", cola->primer_elemento->dato);
-    //printf("Al ultimo: %d\n", cola->ultimo_elemento->dato);
-    // printf("desencolando :%d\n", desencolar(cola));
-   // printf("desencolando :%d\n", desencolar(cola));
-   // printf("desencolando :%d\n", desencolar(cola));
-
-    // destruir(cola);
-    cola_destruir(cola, NULL);
-    return 0;
-}
