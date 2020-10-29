@@ -49,7 +49,7 @@ void *cola_ver_primero(const cola_t *cola) {
 }
 
 void *cola_desencolar(cola_t *cola) {
-    printf("(Entrando a cola_desencolar)\n" );
+    // printf("(Entrando a cola_desencolar)\n" );
 
     if (cola_esta_vacia(cola)) return NULL;
 
@@ -62,7 +62,7 @@ void *cola_desencolar(cola_t *cola) {
     }
     cola->primero_en_entrar = cola->primero_en_entrar->siguiente_nodo;
     // free(tmp);
-    printf("(cola_desencolar) despues del free\n" );
+    // printf("(cola_desencolar) despues del free\n" );
     // if (cola->primero_en_entrar == NULL) {
     //     printf("cola->primero_en_entrar=NULL\n");
     //     return NULL;
@@ -73,7 +73,7 @@ void cola_destruir(cola_t *cola, void (*destruir_dato)(void *)) {
     // printf("(1 Entrando a cola_destruir)\n" );
     if (destruir_dato == NULL) {
         while (cola->primero_en_entrar) {
-            int *tmp = cola_desencolar(cola);
+            void *tmp = cola_desencolar(cola);
             free(tmp);
             // cola_desencolar(cola);
             // printf("(dentro del while)\n" );
@@ -84,7 +84,9 @@ void cola_destruir(cola_t *cola, void (*destruir_dato)(void *)) {
             // printf("2 destruyendo: %d\n",*(int*)cola_ver_primero(cola) );
             destruir_dato(cola->primero_en_entrar->dato);
             // printf("( 3 dentro del while del else)\n" );
-            cola_desencolar(cola);
+            // cola_desencolar(cola);
+            void *tmp = cola_desencolar(cola);
+            free(tmp);
         }
     }
     // free(cola->primero_en_entrar);
