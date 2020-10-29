@@ -8,19 +8,19 @@ typedef struct nodo {
 } nodo_t;
 // el struct
 typedef struct cola {
-    nodo_t* primer_elemento;
-    nodo_t* ultimo_elemento;
+    nodo_t* primero_en_entrar;
+    nodo_t* ultimo_en_entrar;
 } cola_t;
 // primitivas para practicar
 cola_t* cola_crear(void) {
     cola_t *cola = malloc(sizeof(cola_t));
     if (!cola) return NULL;
-    cola->primer_elemento = NULL;
-    cola->ultimo_elemento = NULL;
+    cola->primero_en_entrar = NULL;
+    cola->ultimo_en_entrar = NULL;
     return cola;
 }
 bool cola_esta_vacia(const cola_t *cola) {
-    return cola->primer_elemento == NULL && cola->ultimo_elemento == NULL;
+    return cola->ultimo_en_entrar == NULL && cola->primero_en_entrar == NULL;
 }
 
 // void cola_esta_vacia(cola_t *cola) {
@@ -33,18 +33,19 @@ bool cola_encolar(cola_t *cola, void *valor) {
     if (!nodo) return false;
     nodo->dato = valor;
     nodo->siguiente_nodo = NULL;
-    if (cola->primer_elemento == NULL && cola->ultimo_elemento == NULL) {
-        cola->primer_elemento = nodo;
-        cola->ultimo_elemento = nodo;
+    // cola vacia
+    if (cola->ultimo_en_entrar == NULL && cola->primero_en_entrar == NULL) {
+        cola->ultimo_en_entrar = nodo;
+        cola->primero_en_entrar = nodo;
         return true;
     }
-    cola->primer_elemento->siguiente_nodo = nodo;
-    cola->primer_elemento = cola->primer_elemento->siguiente_nodo;
+    cola->ultimo_en_entrar->siguiente_nodo = nodo;
+    cola->ultimo_en_entrar = cola->ultimo_en_entrar->siguiente_nodo;
     return true;
 }
 
 void *cola_ver_primero(const cola_t *cola) {
-    return cola->ultimo_elemento->dato;
+    return cola->primero_en_entrar->dato;
 }
 
 void *cola_desencolar(cola_t *cola) {
@@ -52,40 +53,42 @@ void *cola_desencolar(cola_t *cola) {
 
     if (cola_esta_vacia(cola)) return NULL;
 
-    nodo_t * tmp = cola->ultimo_elemento;
+    nodo_t * tmp = cola->primero_en_entrar;
     // 1 solo elemento
-    if (cola->ultimo_elemento == cola->primer_elemento) {
-        cola->primer_elemento = NULL;
-        cola->ultimo_elemento = NULL;
-        return tmp;
+    if (cola->primero_en_entrar == cola->ultimo_en_entrar) {
+        cola->ultimo_en_entrar = NULL;
+        cola->primero_en_entrar = NULL;
+        return &tmp->dato;
     }
-    cola->ultimo_elemento = cola->ultimo_elemento->siguiente_nodo;
-    free(tmp);
+    cola->primero_en_entrar = cola->primero_en_entrar->siguiente_nodo;
+    // free(tmp);
     printf("(cola_desencolar) despues del free\n" );
-    if (cola->ultimo_elemento == NULL) {
-        printf("cola->ultimo_elemento=NULL\n");
-        return NULL;
-    }
-    return cola->ultimo_elemento->dato;
+    // if (cola->primero_en_entrar == NULL) {
+    //     printf("cola->primero_en_entrar=NULL\n");
+    //     return NULL;
+    // }
+    return &tmp->dato;
 }
 void cola_destruir(cola_t *cola, void (*destruir_dato)(void *)) {
     // printf("(1 Entrando a cola_destruir)\n" );
     if (destruir_dato == NULL) {
-        while (cola->ultimo_elemento) {
-            cola_desencolar(cola);
+        while (cola->primero_en_entrar) {
+            int *tmp = cola_desencolar(cola);
+            free(tmp);
+            // cola_desencolar(cola);
             // printf("(dentro del while)\n" );
         }
     }
     else {
-        while (cola->ultimo_elemento) {
+        while (cola->primero_en_entrar) {
             // printf("2 destruyendo: %d\n",*(int*)cola_ver_primero(cola) );
-            destruir_dato(cola->ultimo_elemento->dato);
+            destruir_dato(cola->primero_en_entrar->dato);
             // printf("( 3 dentro del while del else)\n" );
             cola_desencolar(cola);
         }
     }
-    // free(cola->ultimo_elemento);
-    // free(cola->primer_elemento);
+    // free(cola->primero_en_entrar);
+    // free(cola->ultimo_en_entrar);
     // printf("antes de free(cola)\n");
     // printf("cola_ver_primero: %d\n",*(int*)cola_ver_primero(cola) );
 
@@ -118,8 +121,8 @@ int main(int argc, char *argv[]) {
 
     // encolar( cola, 45);
     // ver_primero(cola);
-    //printf("Al principio: %d\n", cola->primer_elemento->dato);
-    //printf("Al ultimo: %d\n", cola->ultimo_elemento->dato);
+    //printf("Al principio: %d\n", cola->ultimo_en_entrar->dato);
+    //printf("Al ultimo: %d\n", cola->primero_en_entrar->dato);
     // printf("desencolando :%d\n", desencolar(cola));
     // printf("desencolando :%d\n", desencolar(cola));
     // printf("desencolando :%d\n", desencolar(cola));
@@ -137,36 +140,36 @@ void encolar(cola_t* cola, int dato) {
     nodo_t *nodo = malloc(sizeof(nodo_t));
     nodo->dato = dato;
     nodo->siguiente = NULL;
-    if (cola->primer_elemento == NULL && cola->ultimo_elemento == NULL) {
-    cola->primer_elemento = nodo;
-    cola->ultimo_elemento = nodo;
+    if (cola->ultimo_en_entrar == NULL && cola->primero_en_entrar == NULL) {
+    cola->ultimo_en_entrar = nodo;
+    cola->primero_en_entrar = nodo;
     return;
     }
-    cola->primer_elemento->siguiente = nodo;
-    cola->primer_elemento = cola->primer_elemento->siguiente;
+    cola->ultimo_en_entrar->siguiente = nodo;
+    cola->ultimo_en_entrar = cola->ultimo_en_entrar->siguiente;
 }
 int desencolar(cola_t * cola) {
-    nodo_t * tmp = cola->ultimo_elemento;
+    nodo_t * tmp = cola->primero_en_entrar;
     int dato = tmp->dato;
-    cola->ultimo_elemento = cola->ultimo_elemento->siguiente;
+    cola->primero_en_entrar = cola->primero_en_entrar->siguiente;
     free(tmp);
     return dato;
 }
 void destruir(cola_t* cola) {
-    while (cola->ultimo_elemento) {
+    while (cola->primero_en_entrar) {
       desencolar(cola);
     }
     free(cola);
 }
 bool vacia(cola_t *cola) {
-  return cola->primer_elemento == NULL && cola->ultimo_elemento == NULL;
+  return cola->ultimo_en_entrar == NULL && cola->primero_en_entrar == NULL;
 }
 void esta_vacia(cola_t *cola) {
     if (vacia(cola)) printf("esta vacia\n");
     else printf("No esta vacia\n");
 }
 void ver_primero(const cola_t * cola) {
-    printf("el primero es: %d\n", cola->ultimo_elemento->dato);
+    printf("el primero es: %d\n", cola->primero_en_entrar->dato);
 }
 */
 // las primitivas para el tp
