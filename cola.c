@@ -12,21 +12,21 @@ typedef struct cola {
     nodo_t* ultimo_elemento;
 } cola_t;
 // primitivas para practicar
-cola_t* crear_cola() {
+cola_t* cola_crear(void) {
     cola_t *cola = malloc(sizeof(cola_t));
     if (!cola) return NULL;
     cola->primer_elemento = NULL;
     cola->ultimo_elemento = NULL;
     return cola;
 }
-bool vacia(cola_t *cola) {
+bool cola_esta_vacia(const cola_t *cola) {
     return cola->primer_elemento == NULL && cola->ultimo_elemento == NULL;
 }
 
-void esta_vacia(cola_t *cola) {
-    if (vacia(cola)) printf("esta vacia\n");
-    else printf("No esta vacia\n");
-}
+// void cola_esta_vacia(cola_t *cola) {
+//     if (vacia(cola)) printf("esta vacia\n");
+//     else printf("No esta vacia\n");
+// }
 
 bool cola_encolar(cola_t *cola, void *valor) {
     nodo_t *nodo = malloc(sizeof(nodo_t));
@@ -50,9 +50,15 @@ void *cola_ver_primero(const cola_t *cola) {
 void *cola_desencolar(cola_t *cola) {
     printf("(Entrando a cola_desencolar)\n" );
 
-    if (vacia(cola)) return NULL;
+    if (cola_esta_vacia(cola)) return NULL;
 
     nodo_t * tmp = cola->ultimo_elemento;
+    // 1 solo elemento
+    if (cola->ultimo_elemento == cola->primer_elemento) {
+        cola->primer_elemento = NULL;
+        cola->ultimo_elemento = NULL;
+        return tmp;
+    }
     cola->ultimo_elemento = cola->ultimo_elemento->siguiente_nodo;
     free(tmp);
     printf("(cola_desencolar) despues del free\n" );
@@ -63,30 +69,30 @@ void *cola_desencolar(cola_t *cola) {
     return cola->ultimo_elemento->dato;
 }
 void cola_destruir(cola_t *cola, void (*destruir_dato)(void *)) {
-    printf("(1 Entrando a cola_destruir)\n" );
+    // printf("(1 Entrando a cola_destruir)\n" );
     if (destruir_dato == NULL) {
         while (cola->ultimo_elemento) {
             cola_desencolar(cola);
-            printf("(dentro del while)\n" );
+            // printf("(dentro del while)\n" );
         }
     }
     else {
         while (cola->ultimo_elemento) {
-            printf("2 destruyendo: %d\n",*(int*)cola_ver_primero(cola) );
+            // printf("2 destruyendo: %d\n",*(int*)cola_ver_primero(cola) );
             destruir_dato(cola->ultimo_elemento->dato);
-            printf("( 3 dentro del while del else)\n" );
+            // printf("( 3 dentro del while del else)\n" );
             cola_desencolar(cola);
         }
     }
     // free(cola->ultimo_elemento);
     // free(cola->primer_elemento);
-    printf("antes de free(cola)\n");
+    // printf("antes de free(cola)\n");
     // printf("cola_ver_primero: %d\n",*(int*)cola_ver_primero(cola) );
 
     free(cola);
 
 }
-
+/*
 int main(int argc, char *argv[]) {
     cola_t *cola = crear_cola();
     // esta_vacia(cola);
@@ -123,7 +129,7 @@ int main(int argc, char *argv[]) {
     free(datito);
     return 0;
 }
-
+*/
 
 
 /*
